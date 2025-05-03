@@ -7,9 +7,9 @@
 ## 🚀 Solution Architecture
 
 ```plaintext
-[User’s Browser]
+[User's Browser]
      │
-     │ 1. Upload CSV + click “Generate”
+     │ 1. Upload CSV + click "Generate"
      │
      ▼
 [Static Web App (index.html + JS libs via CDN)]
@@ -21,21 +21,24 @@
      ▼
 [Download GraphML]
      │
-     │ 5. User downloads “pert.graphml”
+     │ 5. User downloads "pert.graphml"
      │ 6. User imports into draw.io (File → Import)
      │
      ▼
 [Editable PERT Diagram in draw.io]
+```
 
 ---
 
 ## 📁 Project Structure
-csv2pert/
-├── index.html # Single-page UI + all logic
-├── example.csv # Sample CSV to test the tool
-├── README.md # This file
-└── LICENSE # MIT or similar
 
+```
+csv2pert/
+├── index.html      # Single-page UI + all logic
+├── example.csv     # Sample CSV to test the tool
+├── README.md       # This file
+└── LICENSE         # MIT or similar
+```
 
 ---
 
@@ -61,27 +64,26 @@ csv2pert/
    ```bash
    git clone https://github.com/<your-username>/csv2pert.git
    cd csv2pert
+   ```
 
-Open in browser
-Double-click index.html or serve via live-server, python -m http.server, etc.
+2. **Open in browser**  
+   Double-click `index.html` or serve via `live-server`, `python -m http.server`, etc.
 
-Use
+3. **Use**  
+   - Upload your CSV (see Example CSV below).
+   - Click "Generate GraphML".
+   - Download and import into draw.io.
 
-Upload your CSV (see Example CSV below).
+4. **Deploy**  
+   Push to GitHub and enable Pages in repo settings (branch: main, folder: /root).
 
-Click Generate GraphML.
+---
 
-Download and import into draw.io.
+## 📖 Example CSV
 
-Deploy
-Push to GitHub and enable Pages in repo settings (branch: main, folder: /root).
+Save the following as `example.csv` and upload it to the app:
 
-📖 Example CSV
-Save the following as example.csv and upload it to the app:
-
-csv
-Copy
-Edit
+```csv
 task_id,o,m,p,dependencies
 A,2,4,6,
 B,1,2,3,A
@@ -90,19 +92,15 @@ D,2,3,4,B,C
 E,1,1.5,2,A
 F,4,6,8,C
 G,2,3,5,E,F
-Column Descriptions
-task_id: Unique identifier for each task
+```
 
-o, m, p: Optimistic, most likely, and pessimistic duration estimates
-
-dependencies: Comma-separated list of predecessor task IDs (leave blank if none)
+### Column Descriptions
+- **task_id**: Unique identifier for each task
+- **o, m, p**: Optimistic, most likely, and pessimistic duration estimates
+- **dependencies**: Comma-separated list of predecessor task IDs (leave blank if none)
 
 The app will compute:
-
-TE (Expected time) = (o + 4m + p) / 6
-
-Variance = ((p − o) / 6)²
-
-ES/EF and LS/LF times
-
-Slack and Critical Path
+- TE (Expected time) = (o + 4m + p) / 6
+- Variance = ((p − o) / 6)²
+- ES/EF and LS/LF times
+- Slack and Critical Path
