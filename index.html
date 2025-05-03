@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV2PERT - Static PERT Diagram Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 2em auto;
+      padding: 0 1em;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    #genBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .error {
+      color: red;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSV2PERT</h1>
+  <p>A zero-server PERT diagram generator: CSV &rarr; GraphML</p>
+
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="genBtn" disabled>Generate GraphML</button>
+  <div id="message" class="error"></div>
+
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- graphlib for graph algorithms -->
+  <script src="https://cdn.jsdelivr.net/npm/graphlib@2.1.8/dist/graphlib.min.js"></script>
+  <script>
+    const csvInput = document.getElementById('csvFile');
+    const genBtn = document.getElementById('genBtn');
+    const messageDiv = document.getElementById('message');
+    let tasks = [];
+
+    csvInput.addEventListener('change', (e) => {
+      messageDiv.textContent = '';
+      const file = e.target.files[0];
+      if (!file) return;
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          tasks = results.data;
+          const required = ['task_id', 'o', 'm', 'p', 'dependencies'];
+          const valid = required.every(col => results.meta.fields.includes(col));
+          if (!valid) {
+            messageDiv.textContent = 'CSV must contain columns: ' + required.join(', ');
+            genBtn.disabled = true;
+          } else {
+            genBtn.disabled = false;
+          }
+        },
+        error: (err) => {
+          messageDiv.textContent = 'Error parsing CSV: ' + err.message;
+          genBtn.disabled = true;
+        }
+      });
+    });
+
+    genBtn.addEventListener('click', () => {
+      try {
+        // Build directed graph
+        const G = new graphlib.Graph({ directed: true });
+        tasks.forEach(r => {
+          const o = parseFloat(r.o);
+          const m = parseFloat(r.m);
+          const p = parseFloat(r.p);
+          if (isNaN(o) || isNaN(m) || isNaN(p)) throw new Error(`Invalid duration for task ${r.task_id}`);
+          const TE = (o + 4 * m + p) / 6;
+          const variance = Math.pow((p - o) / 6, 2);
+          G.setNode(r.task_id, { TE, variance, deps: r.dependencies.trim() });
+        });
+        tasks.forEach(r => {
+          if (r.dependencies) {
+            r.dependencies.split(',').forEach(pred => {
+              const pid = pred.trim();
+              if (pid) G.setEdge(pid, r.task_id);
+            });
+          }
+        });
+
+        // Forward pass
+        const topo = graphlib.alg.topsort(G);
+        const ES = {}, EF = {};
+        topo.forEach(n => {
+          const preds = G.predecessors(n) || [];
+          const es = preds.length ? Math.max(...preds.map(p => EF[p])) : 0;
+          ES[n] = es;
+          EF[n] = es + G.node(n).TE;
+        });
+
+        // Backward pass
+        const LF = {}, LS = {};
+        const projectDuration = Math.max(...Object.values(EF));
+        topo.slice().reverse().forEach(n => {
+          const succs = G.successors(n) || [];
+          const lf = succs.length ? Math.min(...succs.map(s => LS[s])) : projectDuration;
+          LF[n] = lf;
+          LS[n] = lf - G.node(n).TE;
+        });
+
+        // Generate GraphML
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <graph id="G" edgedefault="directed">
+`;
+        topo.forEach(n => {
+          const data = G.node(n);
+          const slack = LS[n] - ES[n];
+          const critical = slack === 0;
+          const label = `${n}\nTE=${data.TE.toFixed(2)}\nSlack=${slack.toFixed(2)}`;
+          xml += `    <node id="${n}">
+      <data key="d0">${label}</data>
+      <data key="critical">${critical}</data>
+    </node>
+`;
+        });
+        G.edges().forEach(e => {
+          xml += `    <edge source="${e.v}" target="${e.w}"/>
+`;
+        });
+        xml += `  </graph>
+</graphml>`;
+
+        // Trigger download
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pert.graphml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        messageDiv.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -36,8 +36,7 @@
 csv2pert/
 ├── index.html      # Single-page UI + all logic
 ├── example.csv     # Sample CSV to test the tool
-├── README.md       # This file
-└── LICENSE         # MIT or similar
+└── README.md       # This file
 ```
 
 ---
