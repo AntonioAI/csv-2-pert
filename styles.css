@@ -1,0 +1,38 @@
+/* styles.css */
+/* Body font is set via Tailwind in index.html using Inter from Google Fonts (implicitly via Tailwind's default config) */
+/* Most styling is done using Tailwind CSS classes directly in the HTML. */
+/* This file can be used for global styles or more complex CSS not easily achievable with Tailwind. */
+
+/* Example: Custom scrollbar (optional) */
+/* ::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e0; 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0; 
+} */
+
+/* Ensure message area has distinct styling for errors/success */
+#messageArea.error {
+    background-color: #FED7D7; /* Tailwind red-200 */
+    color: #C53030; /* Tailwind red-700 */
+    border: 1px solid #FC8181; /* Tailwind red-400 */
+}
+
+#messageArea.success {
+    background-color: #C6F6D5; /* Tailwind green-200 */
+    color: #2F855A; /* Tailwind green-700 */
+    border: 1px solid #68D391; /* Tailwind green-400 */
+}
+
+/* Additional styles for accessibility or specific component needs can go here */
