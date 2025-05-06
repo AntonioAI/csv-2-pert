@@ -1,8 +1,8 @@
-task_id,o,m,p,dependencies
-A,2,4,6,
-B,1,2,3,A
-C,3,5,9,A
-D,2,3,4,B,C
-E,1,1.5,2,A
-F,4,6,8,C
-G,2,3,5,E,F
+task_id,description,optimistic_time,most_likely_time,pessimistic_time,dependencies
+A,,2,4,6,
+B,,1,2,3,A
+C,,3,5,9,A
+D,,2,3,4,"B,C"
+E,,1,1.5,2,A
+F,,4,6,8,C
+G,,2,3,5,"E,F"

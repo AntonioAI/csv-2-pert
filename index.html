@@ -1,152 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSV2PERT - Static PERT Diagram Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 2em auto;
-      padding: 0 1em;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 1em;
-    }
-    #genBtn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .error {
-      color: red;
-      margin-top: 1em;
-    }
-  </style>
-</head>
-<body>
-  <h1>CSV2PERT</h1>
-  <p>A zero-server PERT diagram generator: CSV &rarr; GraphML</p>
-
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="genBtn" disabled>Generate GraphML</button>
-  <div id="message" class="error"></div>
-
-  <!-- PapaParse for CSV parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <!-- graphlib for graph algorithms -->
-  <script src="https://cdn.jsdelivr.net/npm/graphlib@2.1.8/dist/graphlib.min.js"></script>
-  <script>
-    const csvInput = document.getElementById('csvFile');
-    const genBtn = document.getElementById('genBtn');
-    const messageDiv = document.getElementById('message');
-    let tasks = [];
-
-    csvInput.addEventListener('change', (e) => {
-      messageDiv.textContent = '';
-      const file = e.target.files[0];
-      if (!file) return;
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          tasks = results.data;
-          const required = ['task_id', 'o', 'm', 'p', 'dependencies'];
-          const valid = required.every(col => results.meta.fields.includes(col));
-          if (!valid) {
-            messageDiv.textContent = 'CSV must contain columns: ' + required.join(', ');
-            genBtn.disabled = true;
-          } else {
-            genBtn.disabled = false;
-          }
-        },
-        error: (err) => {
-          messageDiv.textContent = 'Error parsing CSV: ' + err.message;
-          genBtn.disabled = true;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to PERT XML Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.8/graphlib.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Additional custom styles if needed, complementing Tailwind */
+        .file-input-button {
+            background-color: #4A5568; /* Tailwind gray-700 */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-      });
-    });
+        .file-input-button:hover {
+            background-color: #2D3748; /* Tailwind gray-800 */
+        }
+        .generate-button {
+            background-color: #38A169; /* Tailwind green-600 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            font-weight: 600; /* Tailwind semibold */
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .generate-button:hover {
+            background-color: #2F855A; /* Tailwind green-700 */
+        }
+        .generate-button:disabled {
+            background-color: #A0AEC0; /* Tailwind gray-400 */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center py-10 px-4">
 
-    genBtn.addEventListener('click', () => {
-      try {
-        // Build directed graph
-        const G = new graphlib.Graph({ directed: true });
-        tasks.forEach(r => {
-          const o = parseFloat(r.o);
-          const m = parseFloat(r.m);
-          const p = parseFloat(r.p);
-          if (isNaN(o) || isNaN(m) || isNaN(p)) throw new Error(`Invalid duration for task ${r.task_id}`);
-          const TE = (o + 4 * m + p) / 6;
-          const variance = Math.pow((p - o) / 6, 2);
-          G.setNode(r.task_id, { TE, variance, deps: r.dependencies.trim() });
-        });
-        tasks.forEach(r => {
-          if (r.dependencies) {
-            r.dependencies.split(',').forEach(pred => {
-              const pid = pred.trim();
-              if (pid) G.setEdge(pid, r.task_id);
-            });
-          }
-        });
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-700">CSV to PERT XML Converter</h1>
+            <p class="text-gray-500 mt-2">Upload your project task CSV to generate a draw.io compatible XML for PERT chart visualization.</p>
+        </header>
 
-        // Forward pass
-        const topo = graphlib.alg.topsort(G);
-        const ES = {}, EF = {};
-        topo.forEach(n => {
-          const preds = G.predecessors(n) || [];
-          const es = preds.length ? Math.max(...preds.map(p => EF[p])) : 0;
-          ES[n] = es;
-          EF[n] = es + G.node(n).TE;
-        });
+        <main>
+            <section class="mb-6">
+                <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Upload CSV File:</label>
+                <div class="flex items-center space-x-4">
+                    <input type="file" id="csvFile" accept=".csv" class="hidden">
+                    <button type="button" onclick="document.getElementById('csvFile').click()" class="file-input-button">
+                        Choose File
+                    </button>
+                    <span id="fileName" class="text-gray-600 italic">No file selected</span>
+                </div>
+                 <p class="mt-1 text-xs text-gray-500">
+                    Required headers: task_id, description, optimistic_time, most_likely_time, pessimistic_time, dependencies
+                </p>
+            </section>
 
-        // Backward pass
-        const LF = {}, LS = {};
-        const projectDuration = Math.max(...Object.values(EF));
-        topo.slice().reverse().forEach(n => {
-          const succs = G.successors(n) || [];
-          const lf = succs.length ? Math.min(...succs.map(s => LS[s])) : projectDuration;
-          LF[n] = lf;
-          LS[n] = lf - G.node(n).TE;
-        });
+            <section class="mb-6 text-center">
+                <button id="generateButton" class="generate-button" disabled>
+                    Generate PERT XML
+                </button>
+            </section>
 
-        // Generate GraphML
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
-  <graph id="G" edgedefault="directed">
-`;
-        topo.forEach(n => {
-          const data = G.node(n);
-          const slack = LS[n] - ES[n];
-          const critical = slack === 0;
-          const label = `${n}\nTE=${data.TE.toFixed(2)}\nSlack=${slack.toFixed(2)}`;
-          xml += `    <node id="${n}">
-      <data key="d0">${label}</data>
-      <data key="critical">${critical}</data>
-    </node>
-`;
-        });
-        G.edges().forEach(e => {
-          xml += `    <edge source="${e.v}" target="${e.w}"/>
-`;
-        });
-        xml += `  </graph>
-</graphml>`;
+            <section id="messageArea" class="mt-6 p-4 rounded-md text-sm">
+                </section>
+        </main>
 
-        // Trigger download
-        const blob = new Blob([xml], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pert.graphml';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        messageDiv.textContent = err.message;
-      }
-    });
-  </script>
+        <footer class="mt-8 text-center text-sm text-gray-500">
+            <p>&copy; 2024 PERT Chart Generator. For educational purposes.</p>
+        </footer>
+    </div>
+
+    <script src="csvParser.js" defer></script>
+    <script src="pertCalculator.js" defer></script>
+    <script src="xmlGenerator.js" defer></script>
+    <script src="ui.js" defer></script>
+
 </body>
 </html>
