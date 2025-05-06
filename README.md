@@ -30,17 +30,6 @@
 
 ---
 
-## 📁 Project Structure
-
-```
-csv2pert/
-├── index.html      # Single-page UI + all logic
-├── example.csv     # Sample CSV to test the tool
-└── README.md       # This file
-```
-
----
-
 ## 🛠 Tech Stack & Modern Best Practices
 
 | Layer              | Technology                                    | Rationale & Best Practices                                  |
@@ -70,8 +59,9 @@ csv2pert/
 
 3. **Use**  
    - Upload your CSV (see Example CSV below).
-   - Click "Generate GraphML".
+   - Click "Generate".
    - Download and import into draw.io.
+   - Once imported into draw.io, go Arrange > layout > e.g. Horizontal Flow.
 
 4. **Deploy**  
    Push to GitHub and enable Pages in repo settings (branch: main, folder: /root).
@@ -87,16 +77,19 @@ task_id,o,m,p,dependencies
 A,2,4,6,
 B,1,2,3,A
 C,3,5,9,A
-D,2,3,4,B,C
+D,2,3,4,"B,C"
 E,1,1.5,2,A
 F,4,6,8,C
-G,2,3,5,E,F
+G,2,3,5,"E,F"
 ```
 
 ### Column Descriptions
 - **task_id**: Unique identifier for each task
 - **o, m, p**: Optimistic, most likely, and pessimistic duration estimates
-- **dependencies**: Comma-separated list of predecessor task IDs (leave blank if none)
+- **dependencies**: Comma-separated list of predecessor task IDs
+   - For multiple dependencies like "B,C", the quotes are essential.
+   - For dependencies like A (a single item), quotes are optional but not harmful. You can write it as A or "A".
+   - If no dependencies, leave blank.
 
 The app will compute:
 - TE (Expected time) = (o + 4m + p) / 6
