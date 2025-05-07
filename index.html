@@ -8,73 +8,134 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.8/graphlib.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Additional custom styles if needed, complementing Tailwind */
-        .file-input-button {
-            background-color: #4A5568; /* Tailwind gray-700 */
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* Tailwind rounded-md */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom button styles to complement Tailwind and provide a consistent look */
+        .btn {
+            padding: 0.625rem 1.25rem; /* 10px 20px */
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 600; /* semibold */
+            transition: all 0.2s ease-in-out;
             cursor: pointer;
-            transition: background-color 0.2s;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .file-input-button:hover {
-            background-color: #2D3748; /* Tailwind gray-800 */
-        }
-        .generate-button {
-            background-color: #38A169; /* Tailwind green-600 */
+        .btn-primary {
+            background-color: #2563EB; /* Tailwind blue-600 */
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.375rem; /* Tailwind rounded-md */
-            font-weight: 600; /* Tailwind semibold */
-            cursor: pointer;
-            transition: background-color 0.2s;
         }
-        .generate-button:hover {
-            background-color: #2F855A; /* Tailwind green-700 */
+        .btn-primary:hover {
+            background-color: #1D4ED8; /* Tailwind blue-700 */
         }
-        .generate-button:disabled {
-            background-color: #A0AEC0; /* Tailwind gray-400 */
+        .btn-primary:disabled {
+            background-color: #9CA3AF; /* Tailwind gray-400 */
             cursor: not-allowed;
         }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center py-10 px-4">
+        .btn-secondary {
+            background-color: #4B5563; /* Tailwind gray-700 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #374151; /* Tailwind gray-800 */
+        }
 
-    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
+        /* Styling for the file input area */
+        .file-input-wrapper {
+            border: 2px dashed #D1D5DB; /* Tailwind gray-300 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            text-align: center;
+            cursor: pointer;
+            background-color: #F9FAFB; /* Tailwind gray-50 */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .file-input-wrapper:hover {
+            background-color: #F3F4F6; /* Tailwind gray-100 */
+            border-color: #9CA3AF; /* Tailwind gray-400 */
+        }
+    </style>
+    <script>
+        // Tailwind Customizations (if any)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800 min-h-screen flex flex-col items-center justify-center py-8 px-4">
+
+    <div class="bg-white p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-3xl transform transition-all duration-500 ease-in-out">
         <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-700">CSV to PERT XML Converter</h1>
-            <p class="text-gray-500 mt-2">Upload your project task CSV to generate a draw.io compatible XML for PERT chart visualization.</p>
+            <div class="flex justify-center items-center mb-4">
+                 <svg class="h-12 w-12 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                <h1 class="text-4xl font-bold text-gray-800">PERT Chart Generator</h1>
+            </div>
+            <p class="text-gray-600 mt-2 text-lg">
+                Transform your project tasks from a CSV file into a professional PERT diagram for <a href="https://draw.io" target="_blank" class="text-blue-600 hover:text-blue-700 underline">draw.io</a>.
+            </p>
         </header>
+
+        <section class="mb-8 bg-sky-50 p-6 rounded-lg border border-sky-200">
+            <h2 class="text-xl font-semibold text-sky-700 mb-3">How it Works:</h2>
+            <ol class="list-decimal list-inside text-gray-700 space-y-2">
+                <li><strong>Prepare Your CSV:</strong> Ensure your CSV has columns: <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">task_id</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">description</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">optimistic_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">most_likely_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">pessimistic_time</code>, and <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">dependencies</code>.
+                    <a href="#csv-details" onclick="event.preventDefault(); document.getElementById('csvFormatDetails').classList.toggle('hidden');" class="text-blue-600 text-xs hover:underline ml-1">(Show Details)</a>
+                </li>
+                <li><strong>Upload:</strong> Click "Choose CSV File" and select your prepared file.</li>
+                <li><strong>Generate:</strong> Hit the "Generate PERT XML" button.</li>
+                <li><strong>Import:</strong> Download the XML and import it into draw.io to visualize your PERT chart!</li>
+            </ol>
+            <div id="csvFormatDetails" class="hidden mt-3 p-3 bg-sky-100 rounded text-sm text-sky-700">
+                <p><strong>Tip for 'dependencies' column:</strong> If a task has multiple dependencies (e.g., TaskA, TaskB), enclose them in quotes in your CSV: <code>"TaskA,TaskB"</code>. Single dependencies don't strictly need quotes.</p>
+            </div>
+        </section>
+
 
         <main>
             <section class="mb-6">
-                <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Upload CSV File:</label>
-                <div class="flex items-center space-x-4">
+                <label for="csvFile" class="block text-lg font-semibold text-gray-700 mb-3">1. Upload CSV File</label>
+                <div id="fileDropArea" class="file-input-wrapper" onclick="document.getElementById('csvFile').click();">
                     <input type="file" id="csvFile" accept=".csv" class="hidden">
-                    <button type="button" onclick="document.getElementById('csvFile').click()" class="file-input-button">
-                        Choose File
-                    </button>
-                    <span id="fileName" class="text-gray-600 italic">No file selected</span>
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <p class="text-gray-600 font-medium">Click to browse or drag & drop</p>
+                        <p id="fileName" class="text-gray-500 italic text-sm mt-1">No file selected</p>
+                    </div>
                 </div>
-                 <p class="mt-1 text-xs text-gray-500">
-                    Required headers: task_id, description, optimistic_time, most_likely_time, pessimistic_time, dependencies
+                 <p class="mt-2 text-xs text-gray-500">
+                    Ensure headers are: task_id, description, optimistic_time, most_likely_time, pessimistic_time, dependencies.
                 </p>
             </section>
 
-            <section class="mb-6 text-center">
-                <button id="generateButton" class="generate-button" disabled>
+            <section class="my-8 text-center">
+                 <button id="generateButton" class="btn btn-primary text-lg w-full sm:w-auto" disabled>
+                    <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
                     Generate PERT XML
                 </button>
             </section>
 
-            <section id="messageArea" class="mt-6 p-4 rounded-md text-sm">
+            <section id="messageArea" class="mt-6 p-4 rounded-md text-sm min-h-[50px]">
                 </section>
         </main>
 
-        <footer class="mt-8 text-center text-sm text-gray-500">
-            <p>&copy; 2024 PERT Chart Generator. For educational purposes.</p>
+        <footer class="mt-10 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
+            <p>&copy; 2024-2025 PERT Chart Generator. Built with modern web technologies.</p>
         </footer>
     </div>
 
@@ -82,6 +143,32 @@
     <script src="pertCalculator.js" defer></script>
     <script src="xmlGenerator.js" defer></script>
     <script src="ui.js" defer></script>
+    <script>
+        // Drag and drop functionality for file input
+        const fileDropArea = document.getElementById('fileDropArea');
+        const csvFileInput = document.getElementById('csvFile');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        fileDropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            fileDropArea.classList.add('bg-blue-50', 'border-blue-400');
+        });
+
+        fileDropArea.addEventListener('dragleave', () => {
+            fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
+        });
+
+        fileDropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
+            if (event.dataTransfer.files.length) {
+                csvFileInput.files = event.dataTransfer.files;
+                // Manually trigger the change event for ui.js to pick up
+                const changeEvent = new Event('change');
+                csvFileInput.dispatchEvent(changeEvent);
+            }
+        });
+    </script>
 
 </body>
 </html>
