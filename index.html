@@ -24,6 +24,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            text-decoration: none; /* Ensure links styled as buttons don't have underlines */
         }
         .btn-primary {
             background-color: #2563EB; /* Tailwind blue-600 */
@@ -43,6 +44,17 @@
         .btn-secondary:hover {
             background-color: #374151; /* Tailwind gray-800 */
         }
+        .btn-outline {
+            background-color: transparent;
+            color: #4B5563; /* Tailwind gray-700 */
+            border: 1px solid #D1D5DB; /* Tailwind gray-300 */
+        }
+        .btn-outline:hover {
+            background-color: #F3F4F6; /* Tailwind gray-100 */
+            border-color: #9CA3AF; /* Tailwind gray-400 */
+            color: #374151; /* Tailwind gray-800 */
+        }
+
 
         /* Styling for the file input area */
         .file-input-wrapper {
@@ -72,9 +84,18 @@
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800 min-h-screen flex flex-col items-center justify-center py-8 px-4">
+<body class="bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800 min-h-screen flex flex-col items-center justify-start py-8 px-4 relative">
 
-    <div class="bg-white p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-3xl transform transition-all duration-500 ease-in-out">
+    <div class="absolute top-4 left-4 sm:top-6 sm:left-6 z-10">
+        <a href="/" class="btn btn-outline text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Back to Projects
+        </a>
+    </div>
+
+    <div class="bg-white p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-3xl transform transition-all duration-500 ease-in-out mt-16 sm:mt-12">
         <header class="mb-8 text-center">
             <div class="flex justify-center items-center mb-4">
                  <svg class="h-12 w-12 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -135,7 +156,7 @@
         </main>
 
         <footer class="mt-10 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
-            <p>&copy; 2024-2025 PERT Chart Generator. Built with modern web technologies.</p>
+            <p>&copy; <span id="currentYear"></span> PERT Chart Generator. Built with modern web technologies.</p>
         </footer>
     </div>
 
@@ -147,27 +168,35 @@
         // Drag and drop functionality for file input
         const fileDropArea = document.getElementById('fileDropArea');
         const csvFileInput = document.getElementById('csvFile');
-        const fileNameDisplay = document.getElementById('fileName');
+        // const fileNameDisplay = document.getElementById('fileName'); // Already declared in ui.js, ensure no conflict or manage scope
 
-        fileDropArea.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            fileDropArea.classList.add('bg-blue-50', 'border-blue-400');
-        });
+        if (fileDropArea && csvFileInput) { // Ensure elements exist before adding listeners
+            fileDropArea.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                fileDropArea.classList.add('bg-blue-50', 'border-blue-400');
+            });
 
-        fileDropArea.addEventListener('dragleave', () => {
-            fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
-        });
+            fileDropArea.addEventListener('dragleave', () => {
+                fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
+            });
 
-        fileDropArea.addEventListener('drop', (event) => {
-            event.preventDefault();
-            fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
-            if (event.dataTransfer.files.length) {
-                csvFileInput.files = event.dataTransfer.files;
-                // Manually trigger the change event for ui.js to pick up
-                const changeEvent = new Event('change');
-                csvFileInput.dispatchEvent(changeEvent);
-            }
-        });
+            fileDropArea.addEventListener('drop', (event) => {
+                event.preventDefault();
+                fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
+                if (event.dataTransfer.files.length) {
+                    csvFileInput.files = event.dataTransfer.files;
+                    // Manually trigger the change event for ui.js to pick up
+                    const changeEvent = new Event('change');
+                    csvFileInput.dispatchEvent(changeEvent);
+                }
+            });
+        }
+
+        // Set current year in footer
+        const yearSpan = document.getElementById('currentYear');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
     </script>
 
 </body>
