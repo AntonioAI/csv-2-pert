@@ -96,3 +96,6 @@ The app will compute:
 - Variance = ((p − o) / 6)²
 - ES/EF and LS/LF times
 - Slack and Critical Path
+
+## Result in draw.io
+![PERT Chart Diagram](./assets/example_pert_diagram.svg)
