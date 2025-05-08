@@ -17,7 +17,7 @@ function generateXML(pertData) {
         rounded: "1",
         strokeColor: "#333333",
         fontSize: "10",
-        fontFamily: "Helvetica", // Changed from Inter to Helvetica
+        fontFamily: "Helvetica",
         align: "left",
         verticalAlign: "top",
         spacingLeft: "4",
@@ -58,23 +58,28 @@ function generateXML(pertData) {
 
         const finalNodeStyle = `${defaultStyleString};${specificFillStyle}`;
         
-        // Node label with HTML for line breaks and formatting
-        // Using toFixed(2) for display consistency of float values.
-        const label = `<b>${xmlEncode(task.id)}: ${xmlEncode(task.description) || 'N/A'}</b><br>` +
-                      `TE: ${task.expectedTime.toFixed(2)} | Var: ${task.variance.toFixed(2)}<br>` +
-                      `ES: ${task.earlyStart.toFixed(2)} | EF: ${task.earlyFinish.toFixed(2)}<br>` +
-                      `LS: ${task.lateStart.toFixed(2)} | LF: ${task.lateFinish.toFixed(2)}<br>` +
-                      `Slack: ${task.slack.toFixed(2)}` +
-                      `${task.isCritical ? '<br><b>CRITICAL</b>' : ''}` +
-                      `${task.isBottleneck ? '<br><i>BOTTLENECK</i>' : ''}`;
+        // Construct the raw HTML label.
+        // Note: task.id and task.description are ALREADY strings.
+        // The xmlEncode for these individual parts is good practice if they could contain '&', for example.
+        // However, the most critical part is encoding the *entire* label before putting it in the XML attribute.
+        const rawLabelHtml = `<b>${xmlEncode(task.id)}: ${xmlEncode(task.description) || 'N/A'}</b><br>` +
+                             `TE: ${task.expectedTime.toFixed(2)} | Var: ${task.variance.toFixed(2)}<br>` +
+                             `ES: ${task.earlyStart.toFixed(2)} | EF: ${task.earlyFinish.toFixed(2)}<br>` +
+                             `LS: ${task.lateStart.toFixed(2)} | LF: ${task.lateFinish.toFixed(2)}<br>` +
+                             `Slack: ${task.slack.toFixed(2)}` +
+                             `${task.isCritical ? '<br><b>CRITICAL</b>' : ''}` +
+                             `${task.isBottleneck ? '<br><i>BOTTLENECK</i>' : ''}`;
 
-        // Basic positioning - can be improved or left for draw.io auto-layout
-        const x = (index % 5) * 200 + 50; // Simple horizontal staggering
-        const y = Math.floor(index / 5) * 150 + 50; // Simple vertical staggering
+        // Basic positioning
+        const x = (index % 5) * 200 + 50; 
+        const y = Math.floor(index / 5) * 150 + 50; 
         const width = 180; 
-        const height = 100; // Adjusted to better fit content with Helvetica
+        const height = 100;
 
-        xml += `    <mxCell id="${xmlEncode(task.id)}" value="${label}" style="${finalNodeStyle}" vertex="1" parent="1">\n`; // Ensure task.id is also encoded if it can contain special chars
+        // IMPORTANT: Encode the entire HTML string for safe insertion into the XML value attribute.
+        const encodedLabel = xmlEncode(rawLabelHtml);
+
+        xml += `    <mxCell id="${xmlEncode(task.id)}" value="${encodedLabel}" style="${finalNodeStyle}" vertex="1" parent="1">\n`;
         xml += `      <mxGeometry x="${x}" y="${y}" width="${width}" height="${height}" as="geometry"/>\n`;
         xml += `    </mxCell>\n`;
     });
@@ -83,14 +88,12 @@ function generateXML(pertData) {
     let edgeCount = 0;
     if (graph && typeof graph.edges === 'function') {
         graph.edges().forEach(edgeObj => {
-            const sourceId = edgeObj.v; // Source task ID
-            const targetId = edgeObj.w; // Target task ID
+            const sourceId = edgeObj.v; 
+            const targetId = edgeObj.w; 
             edgeCount++;
-            // Ensure edge IDs are also XML-safe, though less likely to contain problematic chars
             const edgeId = `edge-${xmlEncode(sourceId)}-${xmlEncode(targetId)}-${edgeCount}`; 
 
-            // Style for edges
-            const edgeStyle = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeWidth=1;strokeColor=#6B7280;"; // Gray-500
+            const edgeStyle = "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;strokeWidth=1;strokeColor=#6B7280;";
 
             xml += `    <mxCell id="${edgeId}" style="${edgeStyle}" edge="1" parent="1" source="${xmlEncode(sourceId)}" target="${xmlEncode(targetId)}">\n`;
             xml += `      <mxGeometry relative="1" as="geometry"/>\n`;
@@ -107,13 +110,12 @@ function generateXML(pertData) {
 /**
  * Encodes a string for use in XML attributes or content.
  * Replaces special characters with their XML entities.
- * @param {string | number} str The string or number to encode.
+ * @param {string | number | undefined} str The string or number to encode.
  * @returns {string} The XML-encoded string.
  */
 function xmlEncode(str) {
-    // Convert to string in case it's a number (like some IDs might be)
-    const s = String(str);
-    if (typeof s !== 'string') return '';
+    if (str === undefined || str === null) return '';
+    const s = String(str); 
     return s.replace(/[<>&"']/g, function (match) {
         switch (match) {
             case '<': return '&lt;';
