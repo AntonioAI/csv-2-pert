@@ -149,4 +149,4 @@ Contributions, issues, and feature requests are welcome. Please feel free to che
 
 ## 📜 License
 
-MIT License. See [LICENSE](https://github.com/AntonioAI/LICENSE) for details.
+MIT License. See [LICENSE](https://github.com/AntonioAI/csv-2-pert/LICENSE) for details.
