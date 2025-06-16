@@ -27,6 +27,7 @@ The application performs PERT calculations (Expected Time, Variance, Early Start
 
 ## ✨ Features
 
+* **CSV Template Download:** Download a pre-formatted CSV template with a single click to get started quickly.
 * **CSV Upload:** Easy drag-and-drop or browse to upload a CSV file containing task data.
 * **Input Validation:** Comprehensive validation of CSV headers, data types, and logical consistency (e.g., optimistic time <= most likely time <= pessimistic time, valid dependencies).
 * **PERT Calculations:** Automatically calculates:
@@ -56,17 +57,15 @@ The application performs PERT calculations (Expected Time, Variance, Early Start
 
 ## 🔧 How It Works
 
-1.  **Prepare Your CSV:** Create a CSV file with the required columns: `task_id`, `description`, `optimistic_time`, `most_likely_time`, `pessimistic_time`, and `dependencies`. (See [CSV File Format](#csv-file-format) for details).
-2.  **Upload:** Use the interface to upload your CSV file. The application will parse and validate it, providing immediate feedback.
-3.  **Generate:** Click the "Generate PERT XML" button.
-4.  **Calculations:**
-    * The `csvParser.js` module reads and validates the CSV data.
-    * The `pertCalculator.js` module takes the parsed tasks, builds a task dependency graph using `graphlib`, performs PERT calculations, identifies the critical path and bottlenecks, and checks for cycles.
-5.  **XML Output:**
-    * The `xmlGenerator.js` module takes the results from the PERT calculator and constructs an XML string in the mxGraph format. Task nodes are styled based on their status (normal, critical, bottleneck).
-6.  **Download & Import:** The generated XML file is automatically downloaded by your browser. You can then import this file into [draw.io / diagrams.net](https://app.diagrams.net/) (File > Import from > Device) to visualize your PERT chart.
+1.  **Download Template:** Click the "Download CSV Template" button on the page to get a `pert_template.csv` file with the correct headers and example data.
+2.  **Prepare Your CSV:**  Edit the template with your own project tasks. Make sure your task_ids are unique and that dependencies are listed correctly.
+3.  **Upload CSV:** Drag your CSV file onto the designated area or click to browse and select it. The app will immediately parse and validate the file, showing a success or error message.
+4.  **Generate XML:** Once the CSV is successfully parsed, click the "Generate PERT XML" button.
+5.  **Download & Import:** The generated XML file is automatically downloaded by your browser. You can then import this file into [draw.io / diagrams.net](https://app.diagrams.net/) (File > Import from > Device) to visualize your PERT chart.
 
-> Tip: Use draw\.io’s **Arrange → Layout** features for optimal chart flow.
+> Tip: After importing, use draw.io’s **Arrange → Layout** features (e.g., "Horizontal Flow") for an optimal chart layout.
+
+![PERT Chart Diagram](./docs/flowchart.svg)
 
 ## 📝 CSV File Format <span id="csv-file-format"></span>
 
