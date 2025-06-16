@@ -109,9 +109,17 @@
         </header>
 
         <section class="mb-8 bg-sky-50 p-6 rounded-lg border border-sky-200">
-            <h2 class="text-xl font-semibold text-sky-700 mb-3">How it Works:</h2>
+            <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-xl font-semibold text-sky-700">How it Works:</h2>
+                 <a href="#" id="downloadTemplateBtn" class="btn btn-outline text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 13.5L12 18m0 0l-4.5-4.5M12 18V3" />
+                    </svg>
+                    Download CSV Template
+                </a>
+            </div>
             <ol class="list-decimal list-inside text-gray-700 space-y-2">
-                <li><strong>Prepare Your CSV:</strong> Ensure your CSV has columns: <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">task_id</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">description</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">optimistic_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">most_likely_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">pessimistic_time</code>, and <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">dependencies</code>.
+                <li><strong>Prepare Your CSV:</strong> Start with our template or ensure your CSV has columns: <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">task_id</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">description</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">optimistic_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">most_likely_time</code>, <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">pessimistic_time</code>, and <code class="bg-sky-100 text-sky-800 px-1 py-0.5 rounded text-sm">dependencies</code>.
                     <a href="#csv-details" onclick="event.preventDefault(); document.getElementById('csvFormatDetails').classList.toggle('hidden');" class="text-blue-600 text-xs hover:underline ml-1">(Show Details)</a>
                 </li>
                 <li><strong>Upload:</strong> Click "Choose CSV File" and select your prepared file.</li>
@@ -119,14 +127,14 @@
                 <li><strong>Import:</strong> Download the XML and import it into draw.io / diagrams.net to visualize your PERT chart!</li>
             </ol>
             <div id="csvFormatDetails" class="hidden mt-3 p-3 bg-sky-100 rounded text-sm text-sky-700">
-                <p><strong>Tip for 'dependencies' column:</strong> If a task has multiple dependencies (e.g., TaskA, TaskB), enclose them in quotes in your CSV: <code>"TaskA,TaskB"</code>. Single dependencies don't strictly need quotes.</p>
+                <p><strong>Tip for 'dependencies' column:</strong> If a task depends on multiple other tasks (e.g., depends on TaskA and TaskB), list their IDs separated by commas and enclose the list in quotes in your CSV, like so: <code>"TaskA,TaskB"</code>. Single dependencies do not require quotes.</p>
             </div>
         </section>
 
 
         <main>
             <section class="mb-6">
-                <label for="csvFile" class="block text-lg font-semibold text-gray-700 mb-3">1. Upload CSV File</label>
+                <label for="csvFile" class="block text-lg font-semibold text-gray-700 mb-3">2. Upload CSV File</label>
                 <div id="fileDropArea" class="file-input-wrapper" onclick="document.getElementById('csvFile').click();">
                     <input type="file" id="csvFile" accept=".csv" class="hidden">
                     <div class="flex flex-col items-center">
@@ -168,9 +176,8 @@
         // Drag and drop functionality for file input
         const fileDropArea = document.getElementById('fileDropArea');
         const csvFileInput = document.getElementById('csvFile');
-        // const fileNameDisplay = document.getElementById('fileName'); // Already declared in ui.js, ensure no conflict or manage scope
 
-        if (fileDropArea && csvFileInput) { // Ensure elements exist before adding listeners
+        if (fileDropArea && csvFileInput) { 
             fileDropArea.addEventListener('dragover', (event) => {
                 event.preventDefault();
                 fileDropArea.classList.add('bg-blue-50', 'border-blue-400');
@@ -185,7 +192,6 @@
                 fileDropArea.classList.remove('bg-blue-50', 'border-blue-400');
                 if (event.dataTransfer.files.length) {
                     csvFileInput.files = event.dataTransfer.files;
-                    // Manually trigger the change event for ui.js to pick up
                     const changeEvent = new Event('change');
                     csvFileInput.dispatchEvent(changeEvent);
                 }
@@ -193,9 +199,33 @@
         }
 
         // Set current year in footer
-        const yearSpan = document.getElementById('currentYear');
-        if (yearSpan) {
-            yearSpan.textContent = new Date().getFullYear();
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Template download functionality
+        const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+        if (downloadTemplateBtn) {
+            downloadTemplateBtn.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent default anchor tag behavior
+
+                // The content of the template CSV file, including example data
+                const csvTemplateContent = `task_id,description,optimistic_time,most_likely_time,pessimistic_time,dependencies
+T1,Requirement Gathering,3,5,10,
+T2,Design Phase,4,6,12,T1
+T3,Development - Module A,5,8,15,T2
+T4,Development - Module B,6,9,18,T2
+T5,Integration,2,3,5,"T3,T4"
+T6,Testing,3,5,8,T5
+T7,Documentation,1,2,3,T2
+T8,Deployment,1,1,2,"T6,T7"`;
+
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvTemplateContent));
+                element.setAttribute('download', 'pert_template.csv');
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            });
         }
     </script>
 
