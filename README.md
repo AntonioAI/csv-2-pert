@@ -56,15 +56,16 @@ The application performs PERT calculations (Expected Time, Variance, Early Start
 
 ## 🔧 How It Works
 
-1.  **Prepare Your CSV:** Create a CSV file with the required columns: `task_id`, `description`, `optimistic_time`, `most_likely_time`, `pessimistic_time`, and `dependencies`. (See [CSV File Format](#csv-file-format) for details).
-2.  **Upload:** Use the interface to upload your CSV file. The application will parse and validate it, providing immediate feedback.
-3.  **Generate:** Click the "Generate PERT XML" button.
-4.  **Calculations:**
+1.  **Download Excel Template:** Download the template.xlsx file locally and fill in the details as required: `task_id`, `description`, `optimistic_time`, `most_likely_time`, `pessimistic_time`, and `dependencies`. (See [CSV File Format](#csv-file-format) for details).
+2.  **Prepare Your CSV:** Save the updated Excel file as .csv
+3.  **Upload:** Use the interface to upload your CSV file. The application will parse and validate it, providing immediate feedback.
+4.  **Generate:** Click the "Generate PERT XML" button.
+5.  **Calculations:**
     * The `csvParser.js` module reads and validates the CSV data.
     * The `pertCalculator.js` module takes the parsed tasks, builds a task dependency graph using `graphlib`, performs PERT calculations, identifies the critical path and bottlenecks, and checks for cycles.
-5.  **XML Output:**
+6.  **XML Output:**
     * The `xmlGenerator.js` module takes the results from the PERT calculator and constructs an XML string in the mxGraph format. Task nodes are styled based on their status (normal, critical, bottleneck).
-6.  **Download & Import:** The generated XML file is automatically downloaded by your browser. You can then import this file into [draw.io / diagrams.net](https://app.diagrams.net/) (File > Import from > Device) to visualize your PERT chart.
+7.  **Download & Import:** The generated XML file is automatically downloaded by your browser. You can then import this file into [draw.io / diagrams.net](https://app.diagrams.net/) (File > Import from > Device) to visualize your PERT chart.
 
 > Tip: Use draw\.io’s **Arrange → Layout** features for optimal chart flow.
 
