@@ -68,6 +68,8 @@ The application performs PERT calculations (Expected Time, Variance, Early Start
 
 > Tip: Use draw\.io’s **Arrange → Layout** features for optimal chart flow.
 
+![PERT Chart Diagram](./docs/flowchart.svg)
+
 ## 📝 CSV File Format <span id="csv-file-format"></span>
 
 The CSV file must contain a header row with the following columns, in any order:
